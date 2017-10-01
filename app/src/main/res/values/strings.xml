@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Metro Explorer</string>
+    <string name="greeting">Welcome\nSelect an Option</string>
+    <string name="button1_text">Use Nearest Station</string>
+    <string name="button2_text">Select Station</string>
+    <string name="button3_text">Favorites</string>
 </resources>
+
