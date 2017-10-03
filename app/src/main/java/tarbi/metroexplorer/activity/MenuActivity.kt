@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.TextView
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import tarbi.metroexplorer.R
 
 /* This is the main activity where the application starts */
@@ -21,6 +23,9 @@ class MenuActivity : AppCompatActivity() {
 
         button1.setOnClickListener {
             val intent = Intent(this@MenuActivity, LandmarksActivity::class.java)
+
+            // put extra flag attribute to find nearest location
+            intent.putExtra("findLocation", true)
             startActivity(intent)
         }
 
