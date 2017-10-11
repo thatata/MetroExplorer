@@ -1,51 +1,58 @@
 package tarbi.metroexplorer.activity
 
-import android.app.Activity
-import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import tarbi.metroexplorer.R
 import tarbi.metroexplorer.util.LocationDetector
 
-class LandmarksActivity : AppCompatActivity() {
+class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener {
+    // Tag
+    private val TAG = "LandmarksActivity"
 
+    // black box class
     private lateinit var locationDetector : LocationDetector
 
-    // request code for location permission request
-    val ACCESS_LOCATION_REQUEST_CODE: Int = 0
+    // latitude and longitude values for current location (set default values)
+    var lat : Double = -1.0
+    var long : Double = -1.0
 
      override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landmarks)
 
          // check extra attribute from intent to determine whether to find location
-         if (intent.getBooleanExtra("findLocation", false)) {
-             getNearestLocation()
+         if (intent.hasExtra("findLocation")) {
+             initLocationDetection()
+         } else {
+             // SELECT METRO STATION FROM LIST OF STATIONS
          }
     }
 
-    fun getNearestLocation() {
+    fun initLocationDetection() {
+        // initialize black box class and its interface
         locationDetector = LocationDetector(this)
-        locationDetector.requestPermissions()
+        locationDetector.locationDetectorListener = this
+
+        locationDetector.getLocation()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        // function to handle response of location permission request
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    override fun locationFound(location: Location) {
+        // update the latitude and longitude values
+        lat = location.latitude
+        long = location.longitude
 
-        // check request code
-        when(requestCode) {
-            ACCESS_LOCATION_REQUEST_CODE -> {
-                // if request is cancelled, the results array is empty
-                if (grantResults != null && grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted
-                    Log.i("Permission", "GRANTED!!!!")
-                } else {
-                    // permission denied
-                    Log.i("Permission", "DENIED!!!!!")
-                }
-                return
+        Log.i("lat/lon", "lat: ${location.latitude} long: ${location.longitude}")
+    }
+
+    override fun locationNotFound(reason: LocationDetector.FailureReason) {
+        when(reason) {
+            LocationDetector.FailureReason.TIMEOUT -> {
+                Log.d(TAG, "Location timed out.")
+            }
+            LocationDetector.FailureReason.NO_PERMISSION -> {
+                Log.d(TAG, "No location permission granted.")
             }
         }
     }
