@@ -45,19 +45,23 @@ class LocationDetector(val context : Context) {
             val locationRequest = LocationRequest()
             locationRequest.interval = 0L
 
+            // create timer to timeout after 10 seconds
+            val timer = Timer()
+
             // create location callback
             val locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult) {
                     // stop location updates
                     locationClient.removeLocationUpdates(this)
 
+                    //cancel timer
+                    timer.cancel()
+
                     // fire callback with location
                     locationDetectorListener?.locationFound(locationResult.locations.first())
                 }
             }
 
-            // create timer to timeout after 10 seconds
-            val timer = Timer()
             timer.schedule(timerTask {
                 // if timer expires, stop location updates and fire callback
                 locationClient.removeLocationUpdates(locationCallback)
