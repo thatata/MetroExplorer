@@ -10,8 +10,6 @@ import java.util.*
 import kotlin.concurrent.timerTask
 
 class LocationDetector(val context : Context) {
-    private val TAG = "LocationDetector"
-
     // member vars for Fused Location Provider and "listener" interface
     private val locationClient : FusedLocationProviderClient
     var locationDetectorListener : LocationDetectorListener? = null
@@ -33,22 +31,22 @@ class LocationDetector(val context : Context) {
         NO_PERMISSION
     }
 
-    // location updates request?
+    // function to handle location request
     fun getLocation() {
-        // get permission result again
+        // check if location permission has been granted
         val permissionResult = ContextCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION)
 
-        // if permission granted, find location
+        // if permission granted, get location
         if (permissionResult == PackageManager.PERMISSION_GRANTED) {
             // create location request
             val locationRequest = LocationRequest()
             locationRequest.interval = 0L
 
-            // create timer to timeout after 10 seconds
+            // create timer to timeout if location cannot be found
             val timer = Timer()
 
-            // create location callback
+            // create location callback when location is found
             val locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult) {
                     // stop location updates
@@ -57,22 +55,24 @@ class LocationDetector(val context : Context) {
                     //cancel timer
                     timer.cancel()
 
-                    // fire callback with location
+                    // fire callback with the latest location
                     locationDetectorListener?.locationFound(locationResult.locations.first())
                 }
             }
 
+            // schedule timer to remove location updates if it times out
             timer.schedule(timerTask {
                 // if timer expires, stop location updates and fire callback
                 locationClient.removeLocationUpdates(locationCallback)
                 locationDetectorListener?.locationNotFound(FailureReason.TIMEOUT)
 
-            }, 10000)
+            }, 10000) // 10 second timer
 
-            // start location updates
+            // start location updates with request and callback
             locationClient.requestLocationUpdates(locationRequest, locationCallback, null)
 
-        } else { // otherwise, call locationNotFound with NO_PERMISSION failure reason
+        } else {
+            // otherwise, call locationNotFound with NO_PERMISSION failure reason
             locationDetectorListener?.locationNotFound(FailureReason.NO_PERMISSION)
         }
     }
