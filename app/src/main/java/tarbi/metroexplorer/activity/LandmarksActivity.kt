@@ -3,6 +3,7 @@ package tarbi.metroexplorer.activity
 import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.ProgressBar
 import org.jetbrains.anko.activityUiThread
 import org.jetbrains.anko.alert
@@ -16,26 +17,24 @@ import tarbi.metroexplorer.util.LocationDetector
 class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener {
 
     private lateinit var locationDetector : LocationDetector
-    private val          progressBar      : ProgressBar = ProgressBar(applicationContext)
+    private lateinit var progressBar      : ProgressBar
     private var          lastLocation     : Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landmarks)
 
-         // check extra attribute from intent to determine whether to find location
-         if (intent.hasExtra("findLocation")) {
-             locationDetector = LocationDetector(applicationContext, this)
-             locationDetector.detectLocation(progressBar)
+        // We initialize late because applicationContext can only be supplied after onCreate
+        progressBar = findViewById(R.id.indeterminateBar)
 
-
-             /* Use FetchMetroStationsManager to get closest station */
-             val stationManager = FetchMetroStationsManager(38.8978168, -77.0404246, 500.0,
-              applicationContext)
-             val nearestStation: Station? = stationManager.getNearestStation()
-         } else {
-             // otherwise, SELECT METRO STATION FROM LIST OF STATIONS
-         }
+        // check extra attribute from intent to determine whether to find location
+        if (intent.hasExtra("findLocation")) {
+            locationDetector = LocationDetector(applicationContext, this)
+            locationDetector.detectLocation(progressBar)
+        } else {
+            // otherwise, SELECT METRO STATION FROM LIST OF STATIONS
+            Log.d("MyTag", "findLocation was not provided")
+        }
     }
 
     override fun locationFound(location: Location) {
@@ -44,6 +43,11 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
 
         // update the last location in memory
         lastLocation = location
+        Log.d("MyTag", "In locationFound, lat: ${lastLocation?.latitude}" +
+                ", lon: ${lastLocation?.longitude}")
+        val stationManager = FetchMetroStationsManager(location.latitude, location.longitude,
+                300.0, applicationContext)
+        val nearestStation: Station? = stationManager.getNearestStation()
     }
 
     fun alertUser(alertTitle : String, alertMessage : String) {
@@ -63,6 +67,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     }
 
     override fun locationNotFound(reason: LocationDetector.FailureReason) {
+        Log.d("MyTag", "Location NOT found")
         // remove progress bar
         locationDetector.showLoading(false, progressBar)
 
@@ -71,7 +76,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
 
         // show corresponding reason to user
         when(reason) {
-            // show alert with proper message
+        // show alert with proper message
             LocationDetector.FailureReason.TIMEOUT -> {
                 alertUser("Location Detection Failed","Location timed out.")
             }

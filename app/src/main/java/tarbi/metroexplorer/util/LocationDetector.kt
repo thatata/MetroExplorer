@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.widget.ProgressBar
 import com.google.android.gms.location.*
 import java.util.*
@@ -31,7 +32,7 @@ class LocationDetector(private val context : Context, val locationDetectorListen
     fun detectLocation(progressBar: ProgressBar) {
         // show progress bar indicating "loading"
         showLoading(true, progressBar)
-        getLocation()
+        locate()
     }
 
     fun showLoading(show : Boolean, progressBar: ProgressBar) {
@@ -46,13 +47,14 @@ class LocationDetector(private val context : Context, val locationDetectorListen
     }
 
     // function to handle location request
-    fun getLocation() {
+    private fun locate() {
         val permissionResult = ContextCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION)
 
         if (permissionResult == PackageManager.PERMISSION_GRANTED) {
             val locationRequest = LocationRequest()
             locationRequest.interval = 0L
+            locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
             // create timer to timeout if location cannot be found
             val timer = Timer()

@@ -8,7 +8,6 @@ import com.koushikdutta.async.future.FutureCallback
 import com.koushikdutta.ion.Ion
 
 /**
- * Created by hobbes on 9/26/17.
  * This uses the WMATA API
  */
 class FetchMetroStationsManager(val lat: Double, val lon: Double, val radius: Double, val context: Context) {
