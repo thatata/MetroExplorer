@@ -3,72 +3,51 @@ package tarbi.metroexplorer.activity
 import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.ProgressBar
-import kotlinx.android.synthetic.main.activity_landmarks.*
 import org.jetbrains.anko.activityUiThread
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.yesButton
 import tarbi.metroexplorer.R
+import tarbi.metroexplorer.util.FetchMetroStationsManager
+import tarbi.metroexplorer.util.Station
 import tarbi.metroexplorer.util.LocationDetector
 
 class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener {
-    // tag for this activity
-    private val TAG = "LandmarksActivity"
 
-    // black box class for detecting location
     private lateinit var locationDetector : LocationDetector
-
-    // store last location in memory
-    private var lastLocation : Location? = null
+    private lateinit var progressBar      : ProgressBar
+    private var          lastLocation     : Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landmarks)
 
-         // check extra attribute from intent to determine whether to find location
-         if (intent.hasExtra("findLocation")) {
-            // if true, get location
-             detectLocation()
-         } else {
-             // otherwise, SELECT METRO STATION FROM LIST OF STATIONS
-         }
-    }
+        // We initialize late because applicationContext can only be supplied after onCreate
+        progressBar = findViewById(R.id.indeterminateBar)
 
-    fun detectLocation() {
-        // initialize black box class and interface
-        initLocationDetection()
-
-        // show progress bar indicating "loading"
-        showLoading(true)
-
-        // get location
-        locationDetector.getLocation()
-    }
-
-    fun showLoading(show : Boolean) {
-        // function to show or remove progress bar
-        if (show) {
-            // set visibility to visible
-            progressBar.visibility = ProgressBar.VISIBLE
+        // check extra attribute from intent to determine whether to find location
+        if (intent.hasExtra("findLocation")) {
+            locationDetector = LocationDetector(applicationContext, this)
+            locationDetector.detectLocation(progressBar)
         } else {
-            // set visibility to invisible
-            progressBar.visibility = ProgressBar.INVISIBLE
+            // otherwise, SELECT METRO STATION FROM LIST OF STATIONS
+            Log.d("MyTag", "findLocation was not provided")
         }
-    }
-
-    fun initLocationDetection() {
-        // initialize black box class and its interface
-        locationDetector = LocationDetector(this)
-        locationDetector.locationDetectorListener = this
     }
 
     override fun locationFound(location: Location) {
         // remove progress bar
-        showLoading(false)
+        locationDetector.showLoading(false, progressBar)
 
         // update the last location in memory
         lastLocation = location
+        Log.d("MyTag", "In locationFound, lat: ${lastLocation?.latitude}" +
+                ", lon: ${lastLocation?.longitude}")
+        val stationManager = FetchMetroStationsManager(location.latitude, location.longitude,
+                300.0, applicationContext)
+        val nearestStation: Station? = stationManager.getNearestStation()
     }
 
     fun alertUser(alertTitle : String, alertMessage : String) {
@@ -88,15 +67,16 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     }
 
     override fun locationNotFound(reason: LocationDetector.FailureReason) {
+        Log.d("MyTag", "Location NOT found")
         // remove progress bar
-        showLoading(false)
+        locationDetector.showLoading(false, progressBar)
 
         // check if last location exists, if so ignore
         if (lastLocation != null) return
 
         // show corresponding reason to user
         when(reason) {
-            // show alert with proper message
+        // show alert with proper message
             LocationDetector.FailureReason.TIMEOUT -> {
                 alertUser("Location Detection Failed","Location timed out.")
             }
