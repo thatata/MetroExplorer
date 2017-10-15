@@ -53,12 +53,15 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             // once as we have a list of stations fetchLandmarks will be called again
             val locationNow = lastLocation
             val stationManager = FetchMetroStationsManager(locationNow?.latitude,
-                    locationNow?.longitude,
-                    1609.34, applicationContext, progressBar, this)
+                    locationNow?.longitude,1609.34, applicationContext, this)
+            progressBar.visibility = ProgressBar.VISIBLE
+            // turn off progressbar when stationList is available in callback
             doAsync {
                 stationManager.getStations()
             }
         }
+
+        // TODO make recycler view of all the stations
     }
 
     private fun alertUser(alertTitle : String, alertMessage : String) {
@@ -80,6 +83,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     /* ---------------------------- Callbacks ---------------------------- */
     override fun stationsFound(stationList: List<Station>?) {
         myStations = stationList
+        progressBar.visibility = ProgressBar.INVISIBLE
         fetchLandmarks()
     }
 
@@ -90,12 +94,8 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     override fun locationFound(location: Location) {
         // remove progress bar
         locationDetector.showLoading(false, progressBar)
-
         // update the last location in memory
         lastLocation = location
-        Log.d("MyTag", "In locationFound, lat: ${lastLocation?.latitude}" +
-                ", lon: ${lastLocation?.longitude}")
-
         fetchLandmarks()
     }
 
