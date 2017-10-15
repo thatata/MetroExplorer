@@ -14,11 +14,14 @@ import tarbi.metroexplorer.util.FetchMetroStationsManager
 import tarbi.metroexplorer.util.Station
 import tarbi.metroexplorer.util.LocationDetector
 
-class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener {
+class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener,
+        FetchMetroStationsManager.FetchMetroListener {
 
     private lateinit var locationDetector : LocationDetector
     private lateinit var progressBar      : ProgressBar
     private var          lastLocation     : Location? = null
+    private var          stationManager   : FetchMetroStationsManager? = null
+    private var          myStations       : List<Station>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,28 +32,36 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
 
         // check extra attribute from intent to determine whether to find location
         if (intent.hasExtra("findLocation")) {
-            locationDetector = LocationDetector(applicationContext, this)
-            locationDetector.detectLocation(progressBar)
+            fetchLandmarks()
         } else {
             // otherwise, SELECT METRO STATION FROM LIST OF STATIONS
             Log.d("MyTag", "findLocation was not provided")
         }
     }
 
-    override fun locationFound(location: Location) {
-        // remove progress bar
-        locationDetector.showLoading(false, progressBar)
+    private fun fetchLandmarks() {
+        // if we don't have a location, try to get one
+        if (lastLocation == null) {
 
-        // update the last location in memory
-        lastLocation = location
-        Log.d("MyTag", "In locationFound, lat: ${lastLocation?.latitude}" +
-                ", lon: ${lastLocation?.longitude}")
-        val stationManager = FetchMetroStationsManager(location.latitude, location.longitude,
-                300.0, applicationContext)
-        val nearestStation: Station? = stationManager.getNearestStation()
+            locationDetector = LocationDetector(applicationContext, this)
+            locationDetector.detectLocation(progressBar)
+            // once as we have location fetchLandmarks will be called again
+            return
+        }
+
+        if (myStations == null)  {
+            // once as we have a list of stations fetchLandmarks will be called again
+            val locationNow = lastLocation
+            val stationManager = FetchMetroStationsManager(locationNow?.latitude,
+                    locationNow?.longitude,
+                    1609.34, applicationContext, progressBar, this)
+            doAsync {
+                stationManager.getStations()
+            }
+        }
     }
 
-    fun alertUser(alertTitle : String, alertMessage : String) {
+    private fun alertUser(alertTitle : String, alertMessage : String) {
         // alert user in an asynchronous task
         doAsync {
             // within an activity UI thread
@@ -64,6 +75,28 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
                 }.show() // show alert
             }
         }
+    }
+
+    /* ---------------------------- Callbacks ---------------------------- */
+    override fun stationsFound(stationList: List<Station>?) {
+        myStations = stationList
+        fetchLandmarks()
+    }
+
+    override fun stationsNotFound() {
+        // TODO tell user that stations were not found
+    }
+
+    override fun locationFound(location: Location) {
+        // remove progress bar
+        locationDetector.showLoading(false, progressBar)
+
+        // update the last location in memory
+        lastLocation = location
+        Log.d("MyTag", "In locationFound, lat: ${lastLocation?.latitude}" +
+                ", lon: ${lastLocation?.longitude}")
+
+        fetchLandmarks()
     }
 
     override fun locationNotFound(reason: LocationDetector.FailureReason) {
