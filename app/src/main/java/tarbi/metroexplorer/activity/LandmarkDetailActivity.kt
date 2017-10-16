@@ -13,6 +13,9 @@ import kotlinx.android.synthetic.main.activity_landmark_details.*
 import tarbi.metroexplorer.R
 import tarbi.metroexplorer.util.Landmark
 import tarbi.metroexplorer.util.PersistanceManager
+import android.widget.Toast
+
+
 
 class LandmarkDetailActivity : AppCompatActivity() {
 
@@ -133,6 +136,10 @@ class LandmarkDetailActivity : AppCompatActivity() {
                 }
         // Set menu item action
         favoriteIcon.setOnMenuItemClickListener {
+            // TODO make this a string for multi language support
+            val toast = Toast.makeText(applicationContext, "Saving to favorites",
+                    Toast.LENGTH_SHORT)
+            toast.show()
             saveToFavorites()
         }
 
