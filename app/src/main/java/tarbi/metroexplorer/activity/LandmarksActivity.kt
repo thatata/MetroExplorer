@@ -1,10 +1,13 @@
 package tarbi.metroexplorer.activity
 
+import android.content.Intent
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import android.view.View
 import android.widget.ProgressBar
 import kotlinx.android.synthetic.main.activity_landmarks.*
 import kotlinx.android.synthetic.main.activity_landmarks_favorites.*
@@ -62,7 +65,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             setContentView(R.layout.activity_landmarks)
 
             // set action bar title
-            actionBar.title = "Landmarks"
+            supportActionBar?.title = "Landmarks"
 
             // We initialize late because applicationContext can only be supplied after onCreate
             progressBar = findViewById(R.id.landmarkProgressBar)
@@ -73,7 +76,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             setContentView(R.layout.activity_landmarks_favorites)
 
             // set action bar title
-            actionBar.title = "Favorites"
+            supportActionBar?.title = "Favorites"
 
             // fetch favorites from shared preferences
             getFavorites()
@@ -125,6 +128,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         // initialize landmark list
         initializeFavoritesList()
     }
+
     private fun getClosetStation(): Station? {
         val myStationsNow: List<Station> = myStations ?: return null
         var closestStation: Station = myStationsNow[0]
@@ -149,9 +153,13 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
 
     private fun initializeLocation(station: Station) {
         // initialize lastLocation and set lat and lon values
-        lastLocation = Location("") // no need to have a provider name
-        lastLocation!!.latitude = station.lat
-        lastLocation!!.longitude = station.lon
+        var tempLocation = lastLocation
+        tempLocation = Location("") // no need to have a provider name
+
+        tempLocation.latitude = station.lat
+        tempLocation.longitude = station.lon
+
+        lastLocation = tempLocation
     }
 
     private fun initializeLandmarkList() {
@@ -169,6 +177,8 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         if (myFavorites == null) {
             // initialize empty list
             myFavorites = arrayListOf()
+
+            noFavoritesText.visibility = View.VISIBLE
         }
 
         // initialize adapter
@@ -218,6 +228,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     override fun landmarksFound(landmarks: List<Landmark>?) {
         myLandmarks = landmarks
         progressBar.visibility = ProgressBar.INVISIBLE
+
         initializeLandmarkList()
     }
 
@@ -231,6 +242,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         // update the last location in memory
         lastLocation = location
         phoneLocation = location
+
         fetchStations()
     }
 

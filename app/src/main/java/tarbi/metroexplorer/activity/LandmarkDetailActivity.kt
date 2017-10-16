@@ -1,5 +1,7 @@
 package tarbi.metroexplorer.activity
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -29,6 +31,40 @@ class LandmarkDetailActivity : AppCompatActivity() {
 
         // set values in the view
         viewLandmarkDetails(landmark)
+
+        // testing
+        shareLandmark(landmark)
+    }
+
+    fun shareLandmark(landmark: Landmark?) {
+        // implicit intent to share
+        if (landmark != null) {
+            // create intent and set action to ACTION_SEND
+            val intent = Intent()
+            intent.setAction(Intent.ACTION_SEND)
+
+            // construct the message to attach
+            val message : String = "${resources.getString(R.string.checkout_text)} ${landmark.name} ${resources.getString(R.string.at_address)} ${landmark.address}"
+
+            // put extra and set plain text
+            intent.putExtra(Intent.EXTRA_TEXT, message)
+            intent.setType("text/plain")
+
+            // start activity
+            startActivity(intent)
+        }
+    }
+
+    fun getDirections(landmark: Landmark?) {
+        // explicit intent to launch walking directions
+        if (landmark?.address != null) {
+            val uriString: String = "google.navigation:q=${landmark.address.replace(" ", "+", false)}&mode=w"
+            val intentUri: Uri = Uri.parse(uriString)
+
+            val intent = Intent(Intent.ACTION_VIEW, intentUri)
+            intent.setPackage("com.google.android.apps.maps")
+            startActivity(intent)
+        }
     }
 
     private fun viewLandmarkDetails(landmark: Landmark?) {
