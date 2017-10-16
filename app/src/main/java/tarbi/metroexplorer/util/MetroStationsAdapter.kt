@@ -7,10 +7,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import tarbi.metroexplorer.R
 
-/**
- * Created by hobbes on 9/26/17.
- */
-class MetroStationsAdapter(private val stations : List<Station>) : RecyclerView.Adapter<MetroStationsAdapter.ViewHolder>() {
+class MetroStationsAdapter(private val stations : List<Station>?) :
+        RecyclerView.Adapter<MetroStationsAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
         //obtain score at position
         val station = stations?.get(position)
@@ -22,6 +20,7 @@ class MetroStationsAdapter(private val stations : List<Station>) : RecyclerView.
     }
 
     override fun getItemCount(): Int {
+        if (stations == null) return -1
         return stations.count()
     }
 
@@ -37,7 +36,7 @@ class MetroStationsAdapter(private val stations : List<Station>) : RecyclerView.
 
         //update score row ui with score and date
         fun bind(station: Station) {
-            stationTextView.text = station.name
+            stationTextView.text = station.stationName
         }
     }
 }
