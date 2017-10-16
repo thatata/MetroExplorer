@@ -43,7 +43,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             setContentView(R.layout.activity_landmarks)
 
             // set action bar title
-            actionBar.title = "Landmarks"
+            supportActionBar?.title = "Landmarks"
 
             // We initialize late because applicationContext can only be supplied after onCreate
             progressBar = findViewById(R.id.landmarkProgressBar)
