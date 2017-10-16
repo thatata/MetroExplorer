@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/shareIcon"
+        android:checkable="false"
+        android:checked="false"
+        android:enabled="true"
+        android:visible="true"
+        app:showAsAction="always"
+        android:title="" />
+    <item
+        android:id="@+id/favoriteIcon"
+        android:checkable="false"
+        android:checked="false"
+        android:enabled="true"
+        android:visible="true"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction"
+        android:title="" />
+    <item
+        android:id="@+id/directionIcon"
+        android:checkable="false"
+        android:checked="false"
+        android:enabled="true"
+        android:visible="true"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction"
+        android:title="" />
+</menu>
