@@ -21,6 +21,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     private lateinit var locationDetector : LocationDetector
     private lateinit var progressBar      : ProgressBar
     private var          lastLocation     : Location? = null
+    private var          phoneLocation    : Location? = null
     private var          myStations       : List<Station>? = null
     private var          myLandmarks        : List<Landmark>? = null
 
@@ -37,6 +38,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
 
             // grab station from the intent extra
             val station = intent.getParcelableExtra<Station>("station")
+            supportActionBar?.title = station.stationName
 
             // initialize location variable
             initializeLocation(station)
@@ -83,13 +85,35 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             return
         }
 
-        // TODO select the closest station
-
+        val closestStation: Station = getClosetStation() ?: return
         // once closest station is detected, initialize lastLocation
-        // initializeLocation(closestStation)
+        initializeLocation(closestStation)
+        supportActionBar?.title = closestStation.stationName
 
         // now fetch landmarks based on that location
         fetchLandmarks()
+    }
+
+    private fun getClosetStation(): Station? {
+        val myStationsNow: List<Station> = myStations ?: return null
+        var closestStation: Station = myStationsNow[0]
+        var shortestDistance: Float
+        // Set loc1 to phone's location
+        val loc1: Location = phoneLocation ?: return null
+        val loc2           = Location("")
+        // Set loc2 to first station
+        loc2.longitude = closestStation.lon
+        loc2.latitude  = closestStation.lat
+        shortestDistance = loc1.distanceTo(loc2)
+        for (station in myStationsNow) {
+            loc2.latitude  = station.lat
+            loc2.longitude = station.lon
+            if (loc1.distanceTo(loc2) < shortestDistance) {
+                shortestDistance = loc1.distanceTo(loc2)
+                closestStation = station
+            }
+        }
+        return closestStation
     }
 
     private fun initializeLocation(station: Station) {
@@ -161,6 +185,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         locationDetector.showLoading(false, progressBar)
         // update the last location in memory
         lastLocation = location
+        phoneLocation = location
         fetchStations()
     }
 
