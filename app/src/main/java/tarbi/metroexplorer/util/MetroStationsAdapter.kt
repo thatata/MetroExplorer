@@ -1,6 +1,8 @@
 package tarbi.metroexplorer.util
 
 import android.support.v7.util.SortedList
+import android.app.Activity
+import android.content.Intent
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,8 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import tarbi.metroexplorer.R
+import tarbi.metroexplorer.activity.LandmarksActivity
 
-class MetroStationsAdapter(stations : List<Station>?) :
+class MetroStationsAdapter(stations : List<Station>?, private val mActivity: Activity) :
         RecyclerView.Adapter<MetroStationsAdapter.ViewHolder>() {
 
     private lateinit var holder: ViewHolder
@@ -93,10 +96,22 @@ class MetroStationsAdapter(stations : List<Station>?) :
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val myView : View = view
         private val stationTextView: TextView = view.findViewById(R.id.stationNameForView)
 
         fun bind(station: Station) {
             stationTextView.text = station.stationName
+
+            // set on click listener that will trigger the LandmarksActivity
+            myView.setOnClickListener {
+                // create new intent
+                val intent = Intent(mActivity, LandmarksActivity::class.java)
+
+                // attach station to the intent
+                intent.putExtra("station", station)
+                mActivity.startActivity(intent)
+            }
+
         }
     }
 }

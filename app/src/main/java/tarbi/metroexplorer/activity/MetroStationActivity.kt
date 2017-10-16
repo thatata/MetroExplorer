@@ -61,7 +61,7 @@ class MetroStationActivity : AppCompatActivity(), LocationDetector.LocationDetec
         }
 
         // initialize adapter with stations
-        stationAdapter = MetroStationsAdapter(myStations)
+        stationAdapter = MetroStationsAdapter(myStations, this)
         // set up recycler view
         metro_station_recycler_view.layoutManager = LinearLayoutManager(this)
         metro_station_recycler_view.adapter = stationAdapter
