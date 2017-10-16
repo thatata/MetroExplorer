@@ -175,7 +175,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             // initialize empty list
             myFavorites = arrayListOf()
 
-            noFavoritesText.visibility = View.VISIBLE
+            supportActionBar?.title = resources.getString(R.string.no_favorites)
         }
 
         // initialize adapter
@@ -190,7 +190,9 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         if (lastLocation == null) return
 
         // create Yelp manager to get landmark data
-        val landmarkManager = YelpAuthManager(lastLocation!!.latitude, lastLocation!!.longitude, applicationContext, this)
+        val lastLocationNow = lastLocation ?: return
+        val landmarkManager = YelpAuthManager(lastLocationNow.latitude, lastLocationNow.longitude,
+                applicationContext, this)
         doAsync {
             landmarkManager.getLandmarks()
         }
