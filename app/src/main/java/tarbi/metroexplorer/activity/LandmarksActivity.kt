@@ -22,14 +22,14 @@ import tarbi.metroexplorer.util.*
 class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener,
         FetchMetroStationsManager.FetchMetroListener, YelpAuthManager.FetchYelpListener {
 
-    private lateinit var locationDetector : LocationDetector
-    private lateinit var progressBar      : ProgressBar
-    private var          lastLocation     : Location? = null
-    private var          phoneLocation    : Location? = null
-    private var          myStations       : List<Station>? = null
+    private lateinit var locationDetector   : LocationDetector
+    private lateinit var progressBar        : ProgressBar
+    private var          lastLocation       : Location? = null
+    private var          phoneLocation      : Location? = null
+    private var          myStations         : List<Station>? = null
     private var          myLandmarks        : List<Landmark>? = null
     private lateinit var persistanceManager : PersistanceManager
-    private var          myFavorites      : List<Landmark>? = null
+    private var          myFavorites        : List<Landmark>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

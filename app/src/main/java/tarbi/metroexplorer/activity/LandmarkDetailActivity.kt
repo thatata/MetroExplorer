@@ -12,10 +12,13 @@ import com.koushikdutta.ion.Ion
 import kotlinx.android.synthetic.main.activity_landmark_details.*
 import tarbi.metroexplorer.R
 import tarbi.metroexplorer.util.Landmark
+import tarbi.metroexplorer.util.PersistanceManager
 
 class LandmarkDetailActivity : AppCompatActivity() {
 
-    private lateinit var progressBar      : ProgressBar
+    private lateinit var progressBar : ProgressBar
+    private lateinit var landmark    : Landmark
+    private lateinit var persistanceManager : PersistanceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,20 +29,20 @@ class LandmarkDetailActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.landmarkdetailProgressBar)
         progressBar.visibility = ProgressBar.VISIBLE
 
+        // initialize persistance manager
+        persistanceManager = PersistanceManager(this)
+
         // setup toolbar
         //setSupportActionBar(landmark_detail_toolbar)
 
         // get parcelized landmark
-        val landmark = intent.getParcelableExtra<Landmark>("landmark")
+        landmark = intent.getParcelableExtra<Landmark>("landmark")
 
         // set values in the view
         viewLandmarkDetails(landmark)
-
-        // testing
-        shareLandmark(landmark)
     }
 
-    fun shareLandmark(landmark: Landmark?) {
+    fun shareLandmark(): Boolean {
         // implicit intent to share
         if (landmark != null) {
             // create intent and set action to ACTION_SEND
@@ -55,10 +58,13 @@ class LandmarkDetailActivity : AppCompatActivity() {
 
             // start activity
             startActivity(intent)
+
         }
+
+        return true
     }
 
-    fun getDirections(landmark: Landmark?) {
+    fun getDirections(): Boolean {
         // explicit intent to launch walking directions
         if (landmark?.address != null) {
             val uriString: String = "google.navigation:q=${landmark.address.replace(" ", "+", false)}&mode=w"
@@ -67,7 +73,15 @@ class LandmarkDetailActivity : AppCompatActivity() {
             val intent = Intent(Intent.ACTION_VIEW, intentUri)
             intent.setPackage("com.google.android.apps.maps")
             startActivity(intent)
+
         }
+
+        return true
+    }
+
+    fun saveToFavorites(): Boolean {
+        persistanceManager.saveFavorite(landmark)
+        return true
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -89,6 +103,10 @@ class LandmarkDetailActivity : AppCompatActivity() {
                         directionIcon.icon = drawMe
                     }
                 }
+        // Set menu item action
+        directionIcon.setOnMenuItemClickListener {
+            getDirections()
+        }
 
         Ion.with(this)
                 .load(shareIconURL)
@@ -99,6 +117,10 @@ class LandmarkDetailActivity : AppCompatActivity() {
                         shareIcon.icon = drawMe
                     }
                 }
+        // Set menu item action
+        shareIcon.setOnMenuItemClickListener {
+            shareLandmark()
+        }
 
         Ion.with(this)
                 .load(favoriteIconURL)
@@ -109,6 +131,10 @@ class LandmarkDetailActivity : AppCompatActivity() {
                         favoriteIcon.icon = drawMe
                     }
                 }
+        // Set menu item action
+        favoriteIcon.setOnMenuItemClickListener {
+            saveToFavorites()
+        }
 
         return true
     }

@@ -8,9 +8,9 @@
         android:checkable="false"
         android:checked="false"
         android:enabled="true"
+        android:title=""
         android:visible="true"
-        app:showAsAction="always"
-        android:title="" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/favoriteIcon"
         android:checkable="false"
