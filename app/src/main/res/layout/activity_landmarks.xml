@@ -7,7 +7,7 @@
 
     <ProgressBar
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:id="@+id/indeterminateBar"
+        android:id="@+id/landmarkProgressBar"
         android:indeterminate="true"
         android:layout_below="@+id/landmarkGreeting"
         android:layout_centerInParent="true"
