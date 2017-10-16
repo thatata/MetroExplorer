@@ -35,10 +35,13 @@ class PersistanceManager(context : Context) {
         // fetch existing favorite landmarks
         val favorites = fetchFavorites().toMutableList()
 
-        //add new score to it
+        // check if landmark is in favorites, if so don't add it
+        if (landmark in favorites) return
+
+        // add new favorited landmark to the list
         favorites.add(landmark)
 
-        //persist to shared preferences
+        // persist to shared preferences
         val editor = sharedPreferences.edit()
         editor.putString(prefKey, Gson().toJson(favorites))
 
