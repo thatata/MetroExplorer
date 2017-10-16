@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Explorador del Metro</string>
+    <string name="greeting">¡Bienvenido!\nSeleccione una Opción</string>
+    <string name="button1_text">Utiliza la Estación más Cercana</string>
+    <string name="button2_text">Seleccione una Estación</string>
+    <string name="button3_text">Estaciones Favoritas</string>
+</resources>
