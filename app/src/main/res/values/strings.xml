@@ -5,5 +5,7 @@
     <string name="button2_text">Select Station</string>
     <string name="button3_text">Favorites</string>
     <string name="action_search">Search</string>
+    <string name="distance_with_colon">Distance:</string>
+    <string name="miles">Miles</string>
 </resources>
 

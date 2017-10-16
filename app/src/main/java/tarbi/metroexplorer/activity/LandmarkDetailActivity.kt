@@ -36,7 +36,15 @@ class LandmarkDetailActivity : AppCompatActivity() {
         // set text details
         landmarkName.text = landmark?.name
         landmarkAddress.text = landmark?.address
-        landmarkDistance.text = "${landmark?.distance} meters"
+
+        // convert distance to miles
+        if (landmark?.distance != null) {
+            // convert meters to miles
+            val distanceInMiles : Double = landmark.distance * 0.000621371
+
+            // present on screen
+            landmarkDistance.text = "${getResources().getString(R.string.distance_with_colon)} $distanceInMiles ${getResources().getString(R.string.miles)}"
+        }
 
         // use Ion to load image, if url exists
         if (landmark?.imageUrl != null && landmark.imageUrl.isNotEmpty()) {
