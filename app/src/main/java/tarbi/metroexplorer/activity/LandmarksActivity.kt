@@ -40,7 +40,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             setContentView(R.layout.activity_landmarks)
 
             // set action bar title
-            supportActionBar?.title = "Landmarks"
+            supportActionBar?.title = resources.getString(R.string.landmarks)
 
             // We initialize late because applicationContext can only be supplied after onCreate
             progressBar = findViewById(R.id.landmarkProgressBar)
@@ -62,7 +62,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             setContentView(R.layout.activity_landmarks)
 
             // set action bar title
-            supportActionBar?.title = "Landmarks"
+            supportActionBar?.title = resources.getString(R.string.landmarks)
 
             // We initialize late because applicationContext can only be supplied after onCreate
             progressBar = findViewById(R.id.landmarkProgressBar)
@@ -72,8 +72,8 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             // set favorites content view
             setContentView(R.layout.activity_landmarks_favorites)
 
-            // set action bar title
-            supportActionBar?.title = "Favorites"
+            // set action bar title (same as button 3 text)
+            supportActionBar?.title = resources.getString(R.string.button3_text)
 
             // fetch favorites from shared preferences
             getFavorites()
@@ -175,7 +175,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             // initialize empty list
             myFavorites = arrayListOf()
 
-            noFavoritesText.visibility = View.VISIBLE
+            supportActionBar?.title = resources.getString(R.string.no_favorites)
         }
 
         // initialize adapter
@@ -190,7 +190,9 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         if (lastLocation == null) return
 
         // create Yelp manager to get landmark data
-        val landmarkManager = YelpAuthManager(lastLocation!!.latitude, lastLocation!!.longitude, applicationContext, this)
+        val lastLocationNow = lastLocation ?: return
+        val landmarkManager = YelpAuthManager(lastLocationNow.latitude, lastLocationNow.longitude,
+                applicationContext, this)
         doAsync {
             landmarkManager.getLandmarks()
         }
@@ -256,10 +258,10 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         when(reason) {
         // show alert with proper message
             LocationDetector.FailureReason.TIMEOUT -> {
-                alertUser("Location Detection Failed","Location timed out, try again later")
+                alertUser(resources.getString(R.string.location_fail),resources.getString(R.string.location_timed_out))
             }
             LocationDetector.FailureReason.NO_PERMISSION -> {
-                alertUser("Location Detection Failed","No location permission granted.")
+                alertUser(resources.getString(R.string.location_fail),resources.getString(R.string.no_location_permission))
             }
         }
     }

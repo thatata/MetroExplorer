@@ -151,10 +151,10 @@ class MetroStationActivity : AppCompatActivity(), LocationDetector.LocationDetec
         when (reason) {
         // show alert with proper message
             LocationDetector.FailureReason.TIMEOUT -> {
-                alertUser("Location Detection Failed", "Location timed out, try again later")
+                alertUser(resources.getString(R.string.location_fail),resources.getString(R.string.location_timed_out))
             }
             LocationDetector.FailureReason.NO_PERMISSION -> {
-                alertUser("Location Detection Failed", "No location permission granted.")
+                alertUser(resources.getString(R.string.location_fail),resources.getString(R.string.no_location_permission))
             }
         }
     }
