@@ -14,6 +14,7 @@ import tarbi.metroexplorer.util.FetchMetroStationsManager
 import tarbi.metroexplorer.util.Station
 import tarbi.metroexplorer.util.LocationDetector
 
+/* Select the nearest station */
 class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener,
         FetchMetroStationsManager.FetchMetroListener {
 
@@ -28,7 +29,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         setContentView(R.layout.activity_landmarks)
 
         // We initialize late because applicationContext can only be supplied after onCreate
-        progressBar = findViewById(R.id.indeterminateBar)
+        progressBar = findViewById(R.id.landmarkProgressBar)
 
         // check extra attribute from intent to determine whether to find location
         if (intent.hasExtra("findLocation")) {
@@ -61,7 +62,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             }
         }
 
-        // TODO make recycler view of all the stations
+        // TODO select the closest station
     }
 
     private fun alertUser(alertTitle : String, alertMessage : String) {

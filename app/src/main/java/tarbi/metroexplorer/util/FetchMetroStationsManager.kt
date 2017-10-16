@@ -2,8 +2,11 @@ package tarbi.metroexplorer.util
 
 import android.content.Context
 import android.util.Log
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.koushikdutta.ion.Ion
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import java.lang.Thread.sleep
 
 /**
@@ -39,10 +42,8 @@ class FetchMetroStationsManager(private val phoneLat: Double?, private val phone
         return null
     }
 
-    fun getStations() : List<Station>? {
-        getEntranceData()
-        return null
-    }
+    fun getStations() { getEntranceData() }
+    fun getAllStations() { getAllData() }
 
     private fun parseEntrances(jsonString: JsonObject?) : MutableList<Station>? {
         if (jsonString == null) {
@@ -60,20 +61,42 @@ class FetchMetroStationsManager(private val phoneLat: Double?, private val phone
             val description: String = entrance.asJsonObject.get("Description").asString
             val stationCode1: String = entrance.asJsonObject.get("StationCode1").asString
             val stationCode2: String = entrance.asJsonObject.get("StationCode2").asString
-            val station = Station(id, lat, lon, description, entranceName, "", stationCode1, stationCode2)
+            val station = Station(id, lat, lon, description, entranceName,
+                    "", stationCode1, stationCode2)
             stationList.add(station)
         }
 
         return stationList
     }
 
-    private fun parseStations(stationList: MutableList<Station>?, jsonString: JsonObject?):
+    private fun parseStation(stationList: MutableList<Station>?, jsonString: JsonObject?):
             List<Station>? {
         if (jsonString == null) {
             return null
         }
         stationList?.filter { it.stationCode1 == jsonString.get("Code").asString }?.
                 forEach { it.stationName = jsonString.get("Name").asString }
+        return stationList
+    }
+
+    private fun parseAllStations(jsonString: JsonObject?): List<Station>? {
+        if (jsonString == null) {
+            return null
+        }
+        val stationList: MutableList<Station> = mutableListOf()
+
+        val jsonAarray: JsonArray = jsonString.getAsJsonArray("Stations")
+
+        for (entrance in jsonAarray) {
+            val lat: Double = entrance.asJsonObject.get("Lat").asDouble
+            val lon: Double = entrance.asJsonObject.get("Lon").asDouble
+            val stationName: String = entrance.asJsonObject.get("Name").asString
+            val stationCode1: String = entrance.asJsonObject.get("Code").asString
+            val station = Station(-1, lat, lon, "", "",
+                    stationName, stationCode1, "")
+            stationList.add(station)
+        }
+
         return stationList
     }
 
@@ -97,11 +120,15 @@ class FetchMetroStationsManager(private val phoneLat: Double?, private val phone
                 .setHeader("api_key", key)
                 .asJsonObject()
                 .setCallback { _: Exception?, result: JsonObject? ->
-                    if (result != null) {
-                        val stationList = parseEntrances(result)
-                        getStationData(stationList)
-                    } else {
-                        listener.stationsNotFound()
+                    doAsync {
+                        if (result != null) {
+                            val stationList = parseEntrances(result)
+                            getStationData(stationList)
+                        } else {
+                            uiThread {
+                                listener.stationsNotFound()
+                            }
+                        }
                     }
                 }
     }
@@ -127,20 +154,51 @@ class FetchMetroStationsManager(private val phoneLat: Double?, private val phone
                             .setHeader("api_key", key)
                             .asJsonObject()
                             .setCallback { _: Exception?, result: JsonObject? ->
-                                if (result != null) {
-                                    parseStations(stationList as MutableList<Station>, result)
-                                } else {
-                                    listener.stationsNotFound()
-                                }
-                                stationCallBackCount++
-                                assert(stationCallBackCount <= stationList.size)
-                                if (stationCallBackCount == stationList.size) {
-                                    // remove duplicates based off of Station Code
-                                    val stationListNoDups = stationList.distinctBy { it.stationCode1 }
-                                    listener.stationsFound(stationListNoDups)
+                                doAsync {
+                                    if (result != null) {
+                                        parseStation(stationList as MutableList<Station>, result)
+                                    } else {
+                                        uiThread {
+                                            listener.stationsNotFound()
+                                        }
+                                    }
+                                    stationCallBackCount++
+                                    assert(stationCallBackCount <= stationList.size)
+                                    if (stationCallBackCount == stationList.size) {
+                                        // remove duplicates based off of Station Code
+                                        Log.d("MyTag", "All stations fetched")
+                                        val stationListNoDups = stationList.distinctBy { it.stationCode1 }
+                                        uiThread {
+                                            listener.stationsFound(stationListNoDups)
+                                        }
+                                    }
                                 }
                             }
         }
+    }
+
+    private fun getAllData() {
+        /* TODO remove the api key into a more private way of storing it */
+        val url = "https://api.wmata.com/Rail.svc/json/jStations"
+        val key = "e825c39a57db43a7a1b23206529caab4"
+        Ion.with(context)
+                .load(url)
+                .setHeader("api_key", key)
+                .asJsonObject()
+                .setCallback { _: Exception?, result: JsonObject? ->
+                    doAsync {
+                        if (result != null) {
+                            val stationList = parseAllStations(result)
+                            uiThread {
+                                listener.stationsFound(stationList)
+                            }
+                        } else {
+                            uiThread {
+                                listener.stationsNotFound()
+                            }
+                        }
+                    }
+                }
     }
 }
 
