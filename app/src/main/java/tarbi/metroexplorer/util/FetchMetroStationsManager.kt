@@ -1,10 +1,12 @@
 package tarbi.metroexplorer.util
 
 import android.content.Context
+import android.os.Parcelable
 import android.util.Log
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.koushikdutta.ion.Ion
+import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.lang.Thread.sleep
@@ -37,7 +39,7 @@ class FetchMetroStationsManager(private val phoneLat: Double?, private val phone
     }
 
     fun getNearestStation() : Station? {
-        getEntranceData()
+        getAllData()
         // TODO do math for getting nearest station
         return null
     }
@@ -202,6 +204,7 @@ class FetchMetroStationsManager(private val phoneLat: Double?, private val phone
     }
 }
 
+@Parcelize
 data class Station(
         val id: Int,
         val lat: Double,
@@ -210,4 +213,4 @@ data class Station(
         val entranceName: String,
         var stationName: String,
         val stationCode1: String,
-        val stationCode2: String)
+        val stationCode2: String) : Parcelable

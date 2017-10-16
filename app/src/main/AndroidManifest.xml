@@ -20,5 +20,6 @@
         </activity>
         <activity android:name=".activity.LandmarksActivity"/>
         <activity android:name=".activity.MetroStationActivity"/>
+        <activity android:name=".activity.LandmarkDetailActivity"/>
     </application>
 </manifest>

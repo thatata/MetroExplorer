@@ -1,12 +1,11 @@
 package tarbi.metroexplorer.util
 
 import android.content.Context
+import android.os.Parcelable
 import android.util.Log
-import android.widget.ProgressBar
-import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonObject
 import com.koushikdutta.ion.Ion
-import org.json.JSONObject
+import kotlinx.android.parcel.Parcelize
 
 /**
  * Created by hobbes on 9/26/17.
@@ -78,8 +77,9 @@ class YelpAuthManager(private val lat : Double, private val lon : Double,
     }
 }
 
+@Parcelize
 data class Landmark(val id: String,
                     val name: String,
                     val address: String,
                     val imageUrl: String,
-                    val distance: Double)
+                    val distance: Double) : Parcelable

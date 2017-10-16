@@ -1,16 +1,20 @@
 package tarbi.metroexplorer.util
 
+import android.app.Activity
+import android.content.Intent
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import tarbi.metroexplorer.R
+import tarbi.metroexplorer.activity.LandmarkDetailActivity
 
 /**
  * Created by hobbes on 9/26/17.
  */
-class LandmarksAdapter(private val landmarks : List<Landmark>?) : RecyclerView.Adapter<LandmarksAdapter.ViewHolder>() {
+class LandmarksAdapter(private val landmarks : List<Landmark>?, private val mActivity: Activity) :
+        RecyclerView.Adapter<LandmarksAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
         //obtain landmark at position
         val landmark = landmarks?.get(position)
@@ -34,11 +38,23 @@ class LandmarksAdapter(private val landmarks : List<Landmark>?) : RecyclerView.A
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val myView : View = view
         private val landmarkTextView: TextView = view.findViewById(R.id.landmarkNameForView)
 
         //update score row ui with score and date
         fun bind(landmark: Landmark) {
             landmarkTextView.text = landmark.name
+
+            // set on click listener to launch LandmarkDetailActivity
+            myView.setOnClickListener {
+                // create intent
+                val intent = Intent(mActivity, LandmarkDetailActivity::class.java)
+
+                // attach landmark to intent
+                intent.putExtra("landmark", landmark)
+
+                mActivity.startActivity(intent)
+            }
         }
     }
 }
