@@ -10,9 +10,6 @@ import android.widget.TextView
 import tarbi.metroexplorer.R
 import tarbi.metroexplorer.activity.LandmarkDetailActivity
 
-/**
- * Created by hobbes on 9/26/17.
- */
 class LandmarksAdapter(private val landmarks : List<Landmark>?, private val mActivity: Activity) :
         RecyclerView.Adapter<LandmarksAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
