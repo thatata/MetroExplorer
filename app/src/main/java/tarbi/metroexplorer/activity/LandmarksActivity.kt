@@ -1,12 +1,16 @@
 package tarbi.metroexplorer.activity
 
+import android.content.Intent
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import android.view.View
 import android.widget.ProgressBar
 import kotlinx.android.synthetic.main.activity_landmarks.*
+import kotlinx.android.synthetic.main.activity_landmarks_favorites.*
 import org.jetbrains.anko.activityUiThread
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.doAsync
@@ -24,14 +28,22 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     private var          phoneLocation    : Location? = null
     private var          myStations       : List<Station>? = null
     private var          myLandmarks        : List<Landmark>? = null
+    private lateinit var persistanceManager : PersistanceManager
+    private var          myFavorites      : List<Landmark>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // initialize persistance manager
+        persistanceManager = PersistanceManager(this)
 
         // check if station was selected
         if (intent.hasExtra("station")) {
             // set activity landmarks content view
             setContentView(R.layout.activity_landmarks)
+
+            // set action bar title
+            actionBar.title = "Landmarks"
 
             // We initialize late because applicationContext can only be supplied after onCreate
             progressBar = findViewById(R.id.landmarkProgressBar)
@@ -45,19 +57,29 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
 
             // no need to get station info, so fetch landmarks
             fetchLandmarks()
+
         }
         // check extra attribute from intent to determine whether to find location
         else if (intent.hasExtra("findLocation")) {
             // set activity landmarks content view
             setContentView(R.layout.activity_landmarks)
 
+            // set action bar title
+            supportActionBar?.title = "Landmarks"
+
             // We initialize late because applicationContext can only be supplied after onCreate
             progressBar = findViewById(R.id.landmarkProgressBar)
 
             fetchStations()
-        } else {
-            // otherwise, DISPLAY FAVORITE LANDMARKS (IF ANY)
-            Log.d("MyTag", "DISPLAY FAVORITE LANDMARKS")
+        } else {  // otherwise, display favorite landmarks
+            // set favorites content view
+            setContentView(R.layout.activity_landmarks_favorites)
+
+            // set action bar title
+            supportActionBar?.title = "Favorites"
+
+            // fetch favorites from shared preferences
+            getFavorites()
         }
     }
 
@@ -93,6 +115,19 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         // now fetch landmarks based on that location
         fetchLandmarks()
     }
+    private fun getFavorites() {
+        // fetch favorite landmarks with persistance manager
+        val favorites: List<Landmark> = persistanceManager.fetchFavorites()
+
+        // check if favorites list is empty
+        if (favorites.isNotEmpty()) {
+            // save favorites in its own variable
+            myFavorites = favorites
+        }
+
+        // initialize landmark list
+        initializeFavoritesList()
+    }
 
     private fun getClosetStation(): Station? {
         val myStationsNow: List<Station> = myStations ?: return null
@@ -118,9 +153,13 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
 
     private fun initializeLocation(station: Station) {
         // initialize lastLocation and set lat and lon values
-        lastLocation = Location("") // no need to have a provider name
-        lastLocation!!.latitude = station.lat
-        lastLocation!!.longitude = station.lon
+        var tempLocation = lastLocation
+        tempLocation = Location("") // no need to have a provider name
+
+        tempLocation.latitude = station.lat
+        tempLocation.longitude = station.lon
+
+        lastLocation = tempLocation
     }
 
     private fun initializeLandmarkList() {
@@ -132,6 +171,22 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         // set up recycler view
         landmark_recycler_view.layoutManager = LinearLayoutManager(this)
         landmark_recycler_view.adapter = landmarkAdapter
+    }
+
+    private fun initializeFavoritesList() {
+        if (myFavorites == null) {
+            // initialize empty list
+            myFavorites = arrayListOf()
+
+            noFavoritesText.visibility = View.VISIBLE
+        }
+
+        // initialize adapter
+        val landmarkAdapter = LandmarksAdapter(myFavorites, this@LandmarksActivity)
+
+        // set up recycler view
+        favorites_recycler_view.layoutManager = LinearLayoutManager(this)
+        favorites_recycler_view.adapter = landmarkAdapter
     }
 
     private fun fetchLandmarks() {
@@ -173,6 +228,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     override fun landmarksFound(landmarks: List<Landmark>?) {
         myLandmarks = landmarks
         progressBar.visibility = ProgressBar.INVISIBLE
+
         initializeLandmarkList()
     }
 
@@ -186,6 +242,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         // update the last location in memory
         lastLocation = location
         phoneLocation = location
+
         fetchStations()
     }
 

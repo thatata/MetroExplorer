@@ -5,5 +5,10 @@
     <string name="button2_text">Select Station</string>
     <string name="button3_text">Favorites</string>
     <string name="action_search">Search</string>
+    <string name="distance_with_colon">Distance:</string>
+    <string name="miles">Miles</string>
+    <string name="no_favorites">No Favorites!</string>
+    <string name="checkout_text">Checkout My New Favorite Landmark,</string>
+    <string name="at_address">! Here\'s the address:</string>
 </resources>
 
