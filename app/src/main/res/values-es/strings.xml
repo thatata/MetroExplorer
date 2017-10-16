@@ -12,6 +12,6 @@
     <string name="checkout_text">¡Mira mi nuevo punto de referencia favorito,</string>
     <string name="at_address">! Aquí está la dirección:</string>
     <string name="location_fail">La Detección Falló</string>
-    <string name="location_timed_out">La ubicación ha caducado.</string>
+    <string name="location_timed_out">La ubicación ha caducado, inténtelo más tarde.</string>
     <string name="no_location_permission">No se otorga permiso de ubicación.</string>
 </resources>

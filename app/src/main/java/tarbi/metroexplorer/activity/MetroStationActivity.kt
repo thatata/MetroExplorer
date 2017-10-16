@@ -10,13 +10,12 @@ import android.view.MenuItem
 import android.widget.ProgressBar
 import android.widget.SearchView
 import kotlinx.android.synthetic.main.activity_metrostation.*
-import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.*
 import tarbi.metroexplorer.R
 import tarbi.metroexplorer.util.FetchMetroStationsManager
 import tarbi.metroexplorer.util.LocationDetector
 import tarbi.metroexplorer.util.MetroStationsAdapter
 import tarbi.metroexplorer.util.Station
-import java.util.Locale.filter
 
 /* Select a station from a list of ALL stations */
 class MetroStationActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener,
@@ -104,6 +103,21 @@ class MetroStationActivity : AppCompatActivity(), LocationDetector.LocationDetec
         return newList
     }
 
+    private fun alertUser(alertTitle : String, alertMessage : String) {
+        // alert user in an asynchronous task
+        doAsync {
+            uiThread {
+                // create alert (with Anko)
+                alert {
+                    // set attributes
+                    title = alertTitle
+                    message = alertMessage
+                    yesButton { }
+                }.show() // show alert
+            }
+        }
+    }
+
     /* ---------------------------- Callbacks ---------------------------- */
     override fun stationsFound(stationList: List<Station>?) {
         myStations = stationList
@@ -125,21 +139,22 @@ class MetroStationActivity : AppCompatActivity(), LocationDetector.LocationDetec
     }
 
     override fun locationNotFound(reason: LocationDetector.FailureReason) {
-        Log.d("MyTag", "Location NOT found")
-        // remove progress bar
-        locationDetector.showLoading(false, progressBar)
+        runOnUiThread {
+            // remove progress bar
+            locationDetector.showLoading(false, progressBar)
+        }
 
         // check if last location exists, if so ignore
         if (lastLocation != null) return
 
         // show corresponding reason to user
-        when(reason) {
+        when (reason) {
         // show alert with proper message
             LocationDetector.FailureReason.TIMEOUT -> {
-                //alertUser("Location Detection Failed","Location timed out.")
+                alertUser("Location Detection Failed", "Location timed out, try again later")
             }
             LocationDetector.FailureReason.NO_PERMISSION -> {
-                //alertUser("Location Detection Failed","No location permission granted.")
+                alertUser("Location Detection Failed", "No location permission granted.")
             }
         }
     }

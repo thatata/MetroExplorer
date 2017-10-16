@@ -12,7 +12,7 @@
     <string name="checkout_text">Check out my new favorite landmark,</string>
     <string name="at_address">! Here\'s the address:</string>
     <string name="location_fail">Location Detection Failed</string>
-    <string name="location_timed_out">Location timed out.</string>
+    <string name="location_timed_out">Location timed out, try again later.</string>
     <string name="no_location_permission">No location permission granted.</string>
 </resources>
 
