@@ -4,4 +4,14 @@
     <string name="button1_text">Utiliza la Estación más Cercana</string>
     <string name="button2_text">Seleccione una Estación</string>
     <string name="button3_text">Estaciones Favoritas</string>
+    <string name="action_search">Buscar</string>
+    <string name="distance_with_colon">Distancia:</string>
+    <string name="landmarks">Puntos de Referencia</string>
+    <string name="miles">Millas</string>
+    <string name="no_favorites">¡No Hay Favoritas!</string>
+    <string name="checkout_text">¡Mira mi nuevo punto de referencia favorito,</string>
+    <string name="at_address">! Aquí está la dirección:</string>
+    <string name="location_fail">La Detección Falló</string>
+    <string name="location_timed_out">La ubicación ha caducado.</string>
+    <string name="no_location_permission">No se otorga permiso de ubicación.</string>
 </resources>
