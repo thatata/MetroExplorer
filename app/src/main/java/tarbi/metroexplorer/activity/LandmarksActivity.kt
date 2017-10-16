@@ -60,6 +60,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             doAsync {
                 stationManager.getStations()
             }
+            return
         }
 
         // TODO select the closest station

@@ -14,16 +14,8 @@
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:id="@+id/metrostationProgressBar"
         android:indeterminate="true"
-        android:layout_below="@+id/metrostationGreeting"
         android:layout_centerInParent="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/metrostationGreeting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Welcome to metro station page"
-        android:textSize="25sp" />
 </RelativeLayout>

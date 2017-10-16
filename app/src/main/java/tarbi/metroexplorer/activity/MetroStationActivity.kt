@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ProgressBar
+import android.widget.SearchView
 import kotlinx.android.synthetic.main.activity_metrostation.*
 import org.jetbrains.anko.doAsync
 import tarbi.metroexplorer.R
@@ -13,15 +16,18 @@ import tarbi.metroexplorer.util.FetchMetroStationsManager
 import tarbi.metroexplorer.util.LocationDetector
 import tarbi.metroexplorer.util.MetroStationsAdapter
 import tarbi.metroexplorer.util.Station
+import java.util.Locale.filter
 
 /* Select a station from a list of ALL stations */
 class MetroStationActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener,
-    FetchMetroStationsManager.FetchMetroListener {
+    FetchMetroStationsManager.FetchMetroListener, SearchView.OnQueryTextListener {
 
     private lateinit var locationDetector : LocationDetector
     private lateinit var progressBar      : ProgressBar
     private var          lastLocation     : Location? = null
     private var          myStations       : List<Station>? = null
+    private var          allStations      : List<Station>? = null
+    private lateinit var stationAdapter   : MetroStationsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,18 +57,57 @@ class MetroStationActivity : AppCompatActivity(), LocationDetector.LocationDetec
             doAsync {
                 stationManager.getAllStations()
             }
+            return
         }
 
         // initialize adapter with stations
-        val stationAdapter = MetroStationsAdapter(myStations)
+        stationAdapter = MetroStationsAdapter(myStations)
         // set up recycler view
         metro_station_recycler_view.layoutManager = LinearLayoutManager(this)
         metro_station_recycler_view.adapter = stationAdapter
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Create menu item so we can search in app bar
+        menuInflater.inflate(R.menu.main_menu, menu)
+        val searchItem: MenuItem = menu.findItem(R.id.action_search)
+        val searchView: SearchView = searchItem.actionView as SearchView
+        searchView.setOnQueryTextListener(this)
+
+        return true
+    }
+
+    override fun onQueryTextSubmit(p0: String?): Boolean {
+        return false
+    }
+
+    override fun onQueryTextChange(p0: String?): Boolean {
+        assert(allStations != null)
+        Log.d("MyTag", "Filter me bby with: $p0")
+        val filterModeList: List<Station> = filter(myStations, p0) ?: return false
+        stationAdapter.replaceAll(filterModeList)
+        return true
+    }
+
+    private fun filter(stations: List<Station>?, query: String?): List<Station>? {
+        if (stations == null || query == null) return null
+        val lowerCaseQuery = query.toLowerCase()
+
+        val newList: MutableList<Station> = mutableListOf()
+        for (station in stations) {
+            val text = station.stationName.toLowerCase()
+            if (text.contains(lowerCaseQuery)) {
+                newList.add(station)
+            }
+        }
+        return newList
     }
 
     /* ---------------------------- Callbacks ---------------------------- */
     override fun stationsFound(stationList: List<Station>?) {
         myStations = stationList
+        allStations = myStations
         progressBar.visibility = ProgressBar.INVISIBLE
         fetchStations()
     }

@@ -149,31 +149,31 @@ class FetchMetroStationsManager(private val phoneLat: Double?, private val phone
             sleep(400, 0)
             var url = "https://api.wmata.com/Rail.svc/json/jStationInfo"
             url += "?StationCode=" + station.stationCode1
-                    Ion.with(context)
-                            .load(url)
-                            .setHeader("api_key", key)
-                            .asJsonObject()
-                            .setCallback { _: Exception?, result: JsonObject? ->
-                                doAsync {
-                                    if (result != null) {
-                                        parseStation(stationList as MutableList<Station>, result)
-                                    } else {
-                                        uiThread {
-                                            listener.stationsNotFound()
-                                        }
-                                    }
-                                    stationCallBackCount++
-                                    assert(stationCallBackCount <= stationList.size)
-                                    if (stationCallBackCount == stationList.size) {
-                                        // remove duplicates based off of Station Code
-                                        Log.d("MyTag", "All stations fetched")
-                                        val stationListNoDups = stationList.distinctBy { it.stationCode1 }
-                                        uiThread {
-                                            listener.stationsFound(stationListNoDups)
-                                        }
-                                    }
+            Ion.with(context)
+                    .load(url)
+                    .setHeader("api_key", key)
+                    .asJsonObject()
+                    .setCallback { _: Exception?, result: JsonObject? ->
+                        doAsync {
+                            if (result != null) {
+                                parseStation(stationList as MutableList<Station>, result)
+                            } else {
+                                uiThread {
+                                    listener.stationsNotFound()
                                 }
                             }
+                            stationCallBackCount++
+                            assert(stationCallBackCount <= stationList.size)
+                            if (stationCallBackCount == stationList.size) {
+                                // remove duplicates based off of Station Code
+                                Log.d("MyTag", "All stations fetched")
+                                val stationListNoDups = stationList.distinctBy { it.stationCode1 }
+                                uiThread {
+                                    listener.stationsFound(stationListNoDups)
+                                }
+                            }
+                        }
+                    }
         }
     }
 
@@ -210,4 +210,12 @@ data class Station(
         val entranceName: String,
         var stationName: String,
         val stationCode1: String,
-        val stationCode2: String)
+        val stationCode2: String) {
+    fun compareTo(station: Station, b: Boolean): Int {
+        return this.stationName.compareTo(station.stationName)
+    }
+
+    fun equals(station: Station): Boolean {
+        return this.stationCode1 == station.stationCode1
+    }
+}
