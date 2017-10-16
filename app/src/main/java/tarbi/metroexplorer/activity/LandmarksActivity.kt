@@ -11,10 +11,7 @@ import android.view.View
 import android.widget.ProgressBar
 import kotlinx.android.synthetic.main.activity_landmarks.*
 import kotlinx.android.synthetic.main.activity_landmarks_favorites.*
-import org.jetbrains.anko.activityUiThread
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.yesButton
+import org.jetbrains.anko.*
 import tarbi.metroexplorer.R
 import tarbi.metroexplorer.util.*
 
@@ -43,7 +40,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             setContentView(R.layout.activity_landmarks)
 
             // set action bar title
-            supportActionBar?.title = "Landmarks"
+            supportActionBar?.title = resources.getString(R.string.landmarks)
 
             // We initialize late because applicationContext can only be supplied after onCreate
             progressBar = findViewById(R.id.landmarkProgressBar)
@@ -65,7 +62,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             setContentView(R.layout.activity_landmarks)
 
             // set action bar title
-            supportActionBar?.title = "Landmarks"
+            supportActionBar?.title = resources.getString(R.string.landmarks)
 
             // We initialize late because applicationContext can only be supplied after onCreate
             progressBar = findViewById(R.id.landmarkProgressBar)
@@ -75,8 +72,8 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             // set favorites content view
             setContentView(R.layout.activity_landmarks_favorites)
 
-            // set action bar title
-            supportActionBar?.title = "Favorites"
+            // set action bar title (same as button 3 text)
+            supportActionBar?.title = resources.getString(R.string.button3_text)
 
             // fetch favorites from shared preferences
             getFavorites()
@@ -203,7 +200,7 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         // alert user in an asynchronous task
         doAsync {
             // within an activity UI thread
-            activityUiThread {
+            uiThread {
                 // create alert (with Anko)
                 alert {
                     // set attributes
@@ -247,9 +244,10 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     }
 
     override fun locationNotFound(reason: LocationDetector.FailureReason) {
-        Log.d("MyTag", "Location NOT found")
-        // remove progress bar
-        locationDetector.showLoading(false, progressBar)
+        runOnUiThread {
+            // remove progress bar
+            locationDetector.showLoading(false, progressBar)
+        }
 
         // check if last location exists, if so ignore
         if (lastLocation != null) return
@@ -258,10 +256,10 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
         when(reason) {
         // show alert with proper message
             LocationDetector.FailureReason.TIMEOUT -> {
-                alertUser("Location Detection Failed","Location timed out.")
+                alertUser(resources.getString(R.string.location_fail),resources.getString(R.string.location_timed_out))
             }
             LocationDetector.FailureReason.NO_PERMISSION -> {
-                alertUser("Location Detection Failed","No location permission granted.")
+                alertUser(resources.getString(R.string.location_fail),resources.getString(R.string.no_location_permission))
             }
         }
     }

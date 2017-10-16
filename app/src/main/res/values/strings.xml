@@ -6,9 +6,13 @@
     <string name="button3_text">Favorites</string>
     <string name="action_search">Search</string>
     <string name="distance_with_colon">Distance:</string>
+    <string name="landmarks">Landmarks</string>
     <string name="miles">Miles</string>
     <string name="no_favorites">No Favorites!</string>
-    <string name="checkout_text">Checkout My New Favorite Landmark,</string>
+    <string name="checkout_text">Check out my new favorite landmark,</string>
     <string name="at_address">! Here\'s the address:</string>
+    <string name="location_fail">Location Detection Failed</string>
+    <string name="location_timed_out">Location timed out, try again later.</string>
+    <string name="no_location_permission">No location permission granted.</string>
 </resources>
 
