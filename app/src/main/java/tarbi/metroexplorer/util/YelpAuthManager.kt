@@ -6,10 +6,9 @@ import android.util.Log
 import com.google.gson.JsonObject
 import com.koushikdutta.ion.Ion
 import kotlinx.android.parcel.Parcelize
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
-/**
- * Created by hobbes on 9/26/17.
- */
 class YelpAuthManager(private val lat : Double, private val lon : Double,
                       private val context: Context, private val listener : FetchYelpListener) {
 
@@ -40,10 +39,17 @@ class YelpAuthManager(private val lat : Double, private val lon : Double,
                 .setHeader("Authorization", accessToken)
                 .asJsonObject()
                 .setCallback { _: Exception?, result: JsonObject? ->
-                    if (result != null) {
-                        listener.landmarksFound(parse(result))
-                    } else {
-                        listener.landsmarksNotFound()
+                    doAsync {
+                        if (result != null) {
+                            val parseResult: List<Landmark> = parse(result) as List<Landmark>
+                            uiThread {
+                                listener.landmarksFound(parseResult)
+                            }
+                        } else {
+                            uiThread {
+                                listener.landsmarksNotFound()
+                            }
+                        }
                     }
                 }
     }

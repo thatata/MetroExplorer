@@ -4,5 +4,6 @@
     <string name="button1_text">Use Nearest Station</string>
     <string name="button2_text">Select Station</string>
     <string name="button3_text">Favorites</string>
+    <string name="action_search">Search</string>
 </resources>
 
