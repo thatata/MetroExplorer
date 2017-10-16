@@ -10,7 +10,7 @@ import tarbi.metroexplorer.R
 class MetroStationsAdapter(private val stations : List<Station>?) :
         RecyclerView.Adapter<MetroStationsAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        //obtain score at position
+        //obtain station at position
         val station = stations?.get(position)
 
         //bind score to view holder

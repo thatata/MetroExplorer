@@ -12,14 +12,15 @@ import org.json.JSONObject
  * Created by hobbes on 9/26/17.
  */
 class YelpAuthManager(private val lat : Double, private val lon : Double,
-                      private val radius : Int, private val context: Context,
-                      private val progressBar: ProgressBar, private val listener : FetchYelpListener) {
+                      private val context: Context, private val listener : FetchYelpListener) {
 
     // interface to talk to Activity
     interface FetchYelpListener {
         fun landmarksFound(landmarks : List<Landmark>?)
         fun landsmarksNotFound()
     }
+
+    fun getLandmarks() { getData() }
 
     private fun getData() {
         // request url
@@ -31,7 +32,6 @@ class YelpAuthManager(private val lat : Double, private val lon : Double,
         // add values to query string
         url += "?latitude=$lat"
         url += "&longitude=$lon"
-        url += "&radius=$radius"
         url += "&categories=landmarks"
         url += "&limit=10" // just get the top 10 landmarks
 
@@ -39,7 +39,6 @@ class YelpAuthManager(private val lat : Double, private val lon : Double,
         Ion.with(context)
                 .load(url)
                 .setHeader("Authorization", accessToken)
-                .progressBar(progressBar)
                 .asJsonObject()
                 .setCallback { _: Exception?, result: JsonObject? ->
                     if (result != null) {
@@ -62,12 +61,12 @@ class YelpAuthManager(private val lat : Double, private val lon : Double,
 
         // parse the string
         for (business in jsonArray) {
-            val id : String = jsonArray.asJsonObject.get("id").asString
-            val name : String = jsonArray.asJsonObject.get("name").asString
-            val address : String = jsonArray.asJsonObject.get("location").asJsonObject.get("address1").asString +
-                                jsonArray.asJsonObject.get("location").asJsonObject.get("city").asString
-            val imageUrl : String = jsonArray.asJsonObject.get("iamge_url").asString
-            val distance : Double = jsonArray.asJsonObject.get("distance").asDouble
+            val id : String = business.asJsonObject.get("id").asString
+            val name : String = business.asJsonObject.get("name").asString
+            val address : String = business.asJsonObject.get("location").asJsonObject.get("address1").asString +
+                    business.asJsonObject.get("location").asJsonObject.get("city").asString
+            val imageUrl : String = business.asJsonObject.get("image_url").asString
+            val distance : Double = business.asJsonObject.get("distance").asDouble
             val landmark = Landmark(id, name, address, imageUrl, distance)
 
             Log.d("Yelp Test", landmark.toString())

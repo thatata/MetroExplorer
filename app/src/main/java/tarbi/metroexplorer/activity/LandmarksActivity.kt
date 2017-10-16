@@ -3,26 +3,26 @@ package tarbi.metroexplorer.activity
 import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.widget.ProgressBar
+import kotlinx.android.synthetic.main.activity_landmarks.*
 import org.jetbrains.anko.activityUiThread
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.yesButton
 import tarbi.metroexplorer.R
-import tarbi.metroexplorer.util.FetchMetroStationsManager
-import tarbi.metroexplorer.util.Station
-import tarbi.metroexplorer.util.LocationDetector
+import tarbi.metroexplorer.util.*
 
 /* Select the nearest station */
 class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetectorListener,
-        FetchMetroStationsManager.FetchMetroListener {
+        FetchMetroStationsManager.FetchMetroListener, YelpAuthManager.FetchYelpListener {
 
     private lateinit var locationDetector : LocationDetector
     private lateinit var progressBar      : ProgressBar
     private var          lastLocation     : Location? = null
-    private var          stationManager   : FetchMetroStationsManager? = null
     private var          myStations       : List<Station>? = null
+    private var          myLandmarks        : List<Landmark>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,9 +60,32 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
             doAsync {
                 stationManager.getStations()
             }
+            // once we have stations fetchLandmarks will be called again
+            return
         }
 
         // TODO select the closest station
+
+        if (myLandmarks == null) {
+            // fetch top 10 landmarks (will use real station location when ready)
+            fetchTopTenLandmarks(38.9074690, -77.0618080)
+
+            return
+        }
+
+        // initialize adapter
+        val landmarkAdapter = LandmarksAdapter(myLandmarks)
+
+        // set up recycler view
+        landmark_recycler_view.layoutManager = LinearLayoutManager(this)
+        landmark_recycler_view.adapter = landmarkAdapter
+    }
+
+    private fun fetchTopTenLandmarks(latitude: Double, longitude: Double) {
+        val landmarkManager = YelpAuthManager(latitude, longitude, applicationContext, this)
+        doAsync {
+            landmarkManager.getLandmarks()
+        }
     }
 
     private fun alertUser(alertTitle : String, alertMessage : String) {
@@ -84,12 +107,21 @@ class LandmarksActivity : AppCompatActivity(), LocationDetector.LocationDetector
     /* ---------------------------- Callbacks ---------------------------- */
     override fun stationsFound(stationList: List<Station>?) {
         myStations = stationList
-        progressBar.visibility = ProgressBar.INVISIBLE
         fetchLandmarks()
     }
 
     override fun stationsNotFound() {
         // TODO tell user that stations were not found
+    }
+
+    override fun landmarksFound(landmarks: List<Landmark>?) {
+        myLandmarks = landmarks
+        progressBar.visibility = ProgressBar.INVISIBLE
+        fetchLandmarks()
+    }
+
+    override fun landsmarksNotFound() {
+        // TODO tell user that landmarks were not found
     }
 
     override fun locationFound(location: Location) {
