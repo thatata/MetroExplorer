@@ -68,7 +68,7 @@ class YelpAuthManager(private val lat : Double, private val lon : Double,
         for (business in jsonArray) {
             val id : String = business.asJsonObject.get("id").asString
             val name : String = business.asJsonObject.get("name").asString
-            val address : String = business.asJsonObject.get("location").asJsonObject.get("address1").asString +
+            val address : String = business.asJsonObject.get("location").asJsonObject.get("address1").asString + " " +
                     business.asJsonObject.get("location").asJsonObject.get("city").asString
             val imageUrl : String = business.asJsonObject.get("image_url").asString
             val distance : Double = business.asJsonObject.get("distance").asDouble
